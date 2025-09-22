@@ -202,6 +202,10 @@ body {
 }
 
 @media (max-width: 480px) {
+  .item-row{
+    display: flex;
+    flex-wrap: wrap;
+  }
     .category-btn {
         padding: 5px 5px;
         font-size: 6px;
