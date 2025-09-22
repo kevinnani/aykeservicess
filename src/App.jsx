@@ -366,59 +366,57 @@ function App() {
       [key]: { ...prev[key], [field]: value },
     }));
   };
-
-  // ✅ PDF download
-  const generatePDF = () => {
-    const items = Object.values(selectedItems);
-    if (items.length === 0) {
-      setMessage("Please select at least one item before downloading PDF.");
-      setTimeout(() => setMessage(""), 3000);
-      return;
-    }
-
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    doc.setFontSize(18);
-    doc.text("Grocery Bill", 40, 50);
-
-    doc.setFontSize(11);
-    doc.text(`Employee Name: ${customerName || "Guest"}`, 40, 75);
-    doc.text(`Date: ${new Date().toLocaleString()}`, 40, 92);
-
-    const body = items.map((it, idx) => {
-      const qty = Number(it.qty) || 0;
-      const price = Number(it.price) || 0;
-      const total = qty * price;
-      return [
-        idx + 1,
-        it.en,
-        it.hi,
-        it.te,
-        `${qty} ${it.unit}`,
-        price.toFixed(2),
-        total.toFixed(2),
-      ];
-    });
-
-    autoTable(doc, {
-      startY: 110,
-      head: [["#", "English", "Hindi", "Telugu", "Qty", "Price ", "Total (₹)"]],
-      body,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-    });
-
-    const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY : 110;
-    const grandTotal = body.reduce((s, r) => s + parseFloat(r[6]), 0);
-
-    doc.setFontSize(12);
-    doc.text(`Grand Total: ${grandTotal.toFixed(2)}`, 40, finalY + 25);
-    doc.setFontSize(10);
-    doc.text("Thank you for your purchase!", 40, finalY + 55);
-
-    doc.save("grocery-bill.pdf");
-    setMessage("PDF downloaded");
+// ✅ PDF download
+const generatePDF = () => {
+  const items = Object.values(selectedItems);
+  if (items.length === 0) {
+    setMessage("Please select at least one item before downloading PDF.");
     setTimeout(() => setMessage(""), 3000);
-  };
+    return;
+  }
+
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  doc.setFontSize(18);
+  doc.text("Grocery Bill", 40, 50);
+
+  doc.setFontSize(11);
+  doc.text(`Employee Name: ${customerName || "Guest"}`, 40, 75);
+  doc.text(`Date: ${new Date().toLocaleString()}`, 40, 92);
+
+  const body = items.map((it, idx) => {
+    const qty = Number(it.qty) || 0;
+    const price = Number(it.price) || 0;
+    return [
+      idx + 1,
+      it.en,
+      it.hi,
+      it.te,
+      `${qty} ${it.unit}`,
+      price.toFixed(2),   // ✅ Take price directly
+      price.toFixed(2),   // ✅ Total is same as price (no multiplication)
+    ];
+  });
+
+  autoTable(doc, {
+    startY: 110,
+    head: [["#", "English", "Hindi", "Telugu", "Qty", "Price (₹)", "Total (₹)"]],
+    body,
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+  });
+
+  const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY : 110;
+  const grandTotal = body.reduce((s, r) => s + parseFloat(r[6]), 0); // ✅ sum of prices only
+
+  doc.setFontSize(12);
+  doc.text(`Grand Total: ${grandTotal.toFixed(2)}`, 40, finalY + 25);
+  doc.setFontSize(10);
+  doc.text("Thank you for your purchase!", 40, finalY + 55);
+
+  doc.save("grocery-bill.pdf");
+  setMessage("PDF downloaded");
+  setTimeout(() => setMessage(""), 3000);
+};
 
   const keyFor = (cat, item) => `${cat}-${item.id}`;
   return (
