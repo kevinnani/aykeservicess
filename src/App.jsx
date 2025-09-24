@@ -397,6 +397,8 @@ const generatePDF = () => {
     ];
   });
 
+
+  
   autoTable(doc, {
     startY: 110,
     head: [["#", "English", "Hindi", "Telugu", "Qty", "Price (₹)", "Total (₹)"]],
